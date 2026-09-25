@@ -1,0 +1,13 @@
+# Fleet repo manifest — deploy every bundle in ./bundles to all clusters
+# that carry the `managed-by: fleet` label (per-customer targeting via overlays).
+# See https://fleet.rancher.io/reference/ref-fleet-yaml
+
+global:
+  fleet:
+    clusterLabels:
+      managed-by: fleet
+    namespace: fleet-default
+
+bundles:
+  - path: bundles/longhorn
+    targetNamespace: longhorn-system

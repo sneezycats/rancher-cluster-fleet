@@ -1,0 +1,41 @@
+---
+# Values port: rs-lh1 cluster shape (tofu reference -> template values)
+# Canonical cluster shape from the working tofu design (smoke/envs/rs-lh1.tfvars),
+# mapped toward the cluster-template chart's Harvester values surface.
+# Fields with unproven template mapping are flagged E1 (see ../docs/test-plan.md).
+
+# --- Rancher / provisioning ---
+rancher_api_url: "https://rancher-single.home.sneezycats.com" # work-lab sync point
+rancher_insecure: false
+rke2_version: "v1.35.8+rke2r1"
+
+# --- Harvester node-driver inputs ---
+cloud_provider: harvester
+cloud_credential_secret_name: "harvester1-171" # Rancher secret (cc-9vrmc)
+harvester_namespace: "k8s-infra"               # VM namespace
+harvester_network: "homelan"                   # NetworkAttachmentDefinition
+harvester_image: "sl-micro-longhorn-6.2-v3g"   # VMI, k8s-infra namespace
+harvester_storage_class: "harvester-longhorn-single-mig" # E1: migratable SC placement
+ssh_user: "sles"                               # E1: user_data/key delivery via template?
+single_disk_pattern: true                      # longhorn_disk_gb = 0
+
+# --- Node pools (3 CP + 3 workers) ---
+nodepools:
+  - name: "rs-lh1-control-plane"
+    roles: [etcd, controlplane] # taint no-worker; E1: role mapping vs tofu taints
+    quantity: 3
+    vcpu: 6
+    memory_gb: 8
+    disk_gb: 80
+  - name: "rs-lh1-workers"
+    roles: [worker]
+    quantity: 3
+    vcpu: 6
+    memory_gb: 8
+    disk_gb: 160
+
+# Rolling update: mirror tofu's machine-deployment behavior (maxUnavailable=1,
+# gated by the longhorn-capi-controller) for hop parity.
+rolling_update:
+  max_unavailable: 1
+  max_surge: 1

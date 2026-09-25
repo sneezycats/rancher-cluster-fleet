@@ -1,0 +1,5 @@
+# .gitignore — the tofu-derived source of truth never leaks credentials
+*.secrets*
+*.from-build
+secrets/
+.DS_Store

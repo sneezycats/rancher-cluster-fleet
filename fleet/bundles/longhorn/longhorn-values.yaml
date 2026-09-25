@@ -1,0 +1,20 @@
+# Longhorn values — test-cluster shape (production-viable defaults).
+# Deliberately conservative: everything not listed uses the chart default.
+# Keep this file short; the chart defaults are the contract.
+
+persistence:
+  defaultClass: true
+  # Production shape: 3 replicas across >= 3 workers (validated: this is what
+  # makes drain/replacement survivable WITHOUT any custom controller).
+  defaultClassReplicaCount: 3
+
+defaultSettings:
+  # Match the SC default so all volumes get the 3-replica shape.
+  defaultReplicaCount: "3"
+  # Fail rather than silently schedule 2 replicas of a volume on one node.
+  replicaZoneSoftAntiAffinity: true
+
+# Longhorn UI: keep enabled for lab observability; disable
+# (service.type: ClusterIP default) exposure stays in-cluster.
+
+# applied after default-namespace purge (release-ownership cleanup)

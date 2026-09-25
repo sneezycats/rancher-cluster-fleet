@@ -1,0 +1,33 @@
+# Fleet GitRepo — apply ONCE on the Rancher management cluster (fleet-default).
+# Fleet then watches this repo and installs/upgrades Longhorn on every cluster
+# matching the selector. See README.md.
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: longhorn
+  namespace: fleet-default
+spec:
+  # -- PORTABLE: point at your git host (this lab: Forgejo, public repo so the
+  #    mgmt cluster's Fleet controllers can clone it without credentials; for a
+  #    private repo use spec.clientSecretName with an HTTPS token secret)
+  # -- PORTABLE: point at your git host. LAB NOTE: the mgmt nodes cannot resolve
+  #    git.home.sneezycats.com (their resolver lacks the home.sneezycats.com
+  #    zone), so the lab uses the IP; at work use the DNS name.
+  repo: http://192.168.1.150:3000/cwillis/fleet-longhorn.git
+  branch: main
+  # Deploy ONLY the longhorn/ path — the repo root holds this GitRepo manifest
+  # and README, which must never be applied to target clusters.
+  paths:
+    - longhorn
+  pollingInterval: 1m
+  correctDrift:
+    enabled: true
+  # Storage config should survive repo removal — never auto-delete Longhorn.
+  keepResources: true
+  targets:
+    # Rancher propagates cluster labels to Fleet cluster objects; only clusters
+    # explicitly labeled for storage get Longhorn (add labels to more clusters
+    # to extend the rollout).
+    - clusterSelector:
+        matchLabels:
+          storage-longhorn: "true"
