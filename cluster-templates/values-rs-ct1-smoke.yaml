@@ -1,0 +1,13 @@
+# E1 smoke cluster: 1 all-role node. Reproduces the E1 result:
+#   helm install rs-ct1 cluster-templates/chart -f cluster-templates/values-rs-ct1-smoke.yaml -n fleet-default
+name: rs-ct1
+description: "E1: cluster-template smoke (1 all-role node, 6.2-v3g)"
+nodepools:
+  - name: cp-worker
+    etcd: true
+    controlplane: true
+    worker: true
+    quantity: 1
+    vcpu: 6
+    memory: 8
+    disk: 80

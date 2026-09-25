@@ -53,3 +53,63 @@ Baseline numbers from tofu (2026-09-25, rs-lh1): 6-node build Ready in ~9 min;
 OS-image hop 6.0→6.1→6.2: 6 machine replacements, ~25–35 min per hop, zero data loss
 (created-at `2026-09-25T14:28:54Z` survived 12 replacements; counters continuous;
 replicas 3/3 through every churn).
+## E1 RESULT — PASS (2026-09-25, rancher-single 2.14.1 + harvester1 1.7.1)
+
+Charted in cluster-templates/chart/ (rke2-harvester 0.1.0). Renders the CURRENT
+provisioning.cattle.io/v1 Cluster + rke-machine-config.cattle.io/v1 HarvesterConfig
+shapes (ported from live rs-lh1). Cluster rs-ct1 (1 all-role node) provisioned:
+
+- helm install -> Cluster CR (t0); VMI Running on harvester1 at t+45s (IP .152,
+  k8s-infra/homelan, 6.2-v3g image); machine Provisioned t+180s; cluster
+  Provisioned/Connected/AgentDeployed/Ready; node Ready + cattle-cluster-agent +
+  CCM (harvester-cloud-provider) + calico/traefik + system-upgrade-controller
+  running at ~10-12 min.
+- Chart values --> cloud-init chain verified end-to-end (ssh as sles with cwsneezy
+  key works; sudo present).
+
+Answers from E1:
+- dynamicSchemaSpec NOT required in template machinePools (omitted -> worked).
+- Storage class is NOT template-driven: VMs land on the Harvester default SC
+  (harvester-longhorn-single-mig on h1). Parity with work clickops: fine.
+- cloudCredentialSecretName references the Rancher credential (cattle-global-data:cc-9vrmc).
+- Helm upgrade with changed chart values rolled the machine automatically
+  (Deleting/Provisioning pair) — E2 signal: config delta -> machine replacement.
+
+Pitfalls:
+- Local-cluster kubeconfig secrets embed the internal service IP (10.43.x.x,
+  unroutable off-cluster): rewrite server to the public URL +
+  --insecure-skip-tls-verify for lab probes.
+- Helm template rendering: YAML parses numbers as float64 -> use %.0f in printf,
+  not %d (produces %!d(float64=N) corruption).
+- Stale example chart (rancher/cluster-template-examples) predates the current
+  driver field set; port the values from live objects, dont copy its values shape.
+## E1 RESULT — PASS (2026-09-25, rancher-single 2.14.1 + harvester1 1.7.1)
+
+Charted in cluster-templates/chart/ (rke2-harvester 0.1.0). Renders the CURRENT
+provisioning.cattle.io/v1 Cluster + rke-machine-config.cattle.io/v1 HarvesterConfig
+shapes (ported from live rs-lh1). Cluster rs-ct1 (1 all-role node) provisioned:
+
+- helm install -> Cluster CR (t0); VMI Running on harvester1 at t+45s (IP .152,
+  k8s-infra/homelan, 6.2-v3g image); machine Provisioned t+180s; cluster
+  Provisioned/Connected/AgentDeployed/Ready; node Ready + cattle-cluster-agent +
+  CCM (harvester-cloud-provider) + calico/traefik + system-upgrade-controller
+  running at ~10-12 min.
+- Chart values --> cloud-init chain verified end-to-end (ssh as sles with cwsneezy
+  key works; sudo present).
+
+Answers from E1:
+- dynamicSchemaSpec NOT required in template machinePools (omitted -> worked).
+- Storage class is NOT template-driven: VMs land on the Harvester default SC
+  (harvester-longhorn-single-mig on h1). Parity with work clickops: fine.
+- cloudCredentialSecretName references the Rancher credential (cattle-global-data:cc-9vrmc).
+- Helm upgrade with changed chart values rolled the machine automatically
+  (Deleting/Provisioning pair) — E2 signal: config delta -> machine replacement.
+
+Pitfalls:
+- Local-cluster kubeconfig secrets embed the internal service IP (10.43.x.x,
+  unroutable off-cluster): rewrite server to the public URL +
+  --insecure-skip-tls-verify for lab probes.
+- Helm template rendering: YAML parses numbers as float64 -> use %.0f in printf,
+  not %d (produces %!d(float64=N) corruption).
+- Stale example chart (rancher/cluster-template-examples) predates the current
+  driver field set; port the values from live objects, don't copy its values shape.
