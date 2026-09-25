@@ -1,0 +1,8 @@
+apiVersion: v1
+name: rke2-harvester
+description: RKE2 cluster template for Harvester-backed clusters (work/lab parity 2.14.1 + 1.7.1)
+version: 0.1.0
+annotations:
+  catalog.cattle.io/type: cluster-template
+  catalog.cattle.io/namespace: fleet-default
+  catalog.cattle.io/display-name: RKE2 on Harvester

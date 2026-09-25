@@ -1,0 +1,49 @@
+# Values for the RKE2-on-Harvester cluster template.
+# Defaults ported verbatim from the working rs-lh1 tofu design
+# (provisioning.cattle.io Cluster + rke-machine-config HarvesterConfig on
+# rancher-single 2.14.1 / harvester1 1.7.1).
+
+# Cluster name: defaults to the helm release name (install as: helm install rs-ct1 ...)
+name: ""
+description: ""
+
+kubernetesVersion: "v1.35.8+rke2r1"
+cloudCredentialSecretName: "cattle-global-data:cc-9vrmc"   # Rancher cloud credential (harvester1)
+
+# --- Harvester provider defaults (per-pool overrides below) ---
+vmNamespace: "k8s-infra"
+networkName: "k8s-infra/homelan"
+imageName: "sl-micro-longhorn-6.2-v3g"
+diskSize: 80
+diskBus: "virtio"
+sshUser: "sles"
+# cloud-init: user sles (NOPASSWD sudo) + cwsneezy pubkey — verbatim from rs-lh1
+userData: "I2Nsb3VkLWNvbmZpZwp1c2VyczoKICAtIG5hbWU6IHNsZXMKICAgIHN1ZG86IEFMTD0oQUxMKSBOT1BBU1NXRDpBTEwKICAgIHNzaF9hdXRob3JpemVkX2tleXM6CiAgICAgIC0gc3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUdOMFVMbWo4Z2ZQUkhpbjB6NmRCZnJ1T3laeFowYXhlSENkWkdtQkdUblMgY2hyaXNAc25lZXp5Y2F0cy5jb20K"
+
+# --- RKE2 global config (rs-lh1 parity: calico + traefik) ---
+machineGlobalConfig:
+  cni: calico
+  ingress-controller: traefik
+
+# harvester-cloud-provider chart values (CCM on control plane nodes)
+harvesterCloudProvider:
+  cloudConfigPath: /var/lib/rancher/rke2/etc/config-files/cloud-provider-config
+
+# --- Node pools ---
+nodepools:
+  - name: control-plane
+    etcd: true
+    controlplane: true
+    worker: false
+    quantity: 3
+    vcpu: 6
+    memory: 8
+    disk: 80
+  - name: workers
+    etcd: false
+    controlplane: false
+    worker: true
+    quantity: 3
+    vcpu: 6
+    memory: 8
+    disk: 160
